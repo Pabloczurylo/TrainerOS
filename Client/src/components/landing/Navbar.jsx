@@ -18,8 +18,19 @@ const Navbar = () => {
           <a href="#contacto" className="hover:text-white transition-colors">Contacto</a>
         </div>
 
-        {/* Botón de Contacto */}
-        <div>
+        {/* Botones de Autenticación y Contacto */}
+        <div className="flex items-center gap-4">
+          <Link 
+            to="/login" 
+            className="hidden md:block text-gray-300 hover:text-white text-sm font-medium transition-colors"
+          >
+            Log In
+          </Link>
+          <button 
+            className="hidden md:block text-gray-300 hover:text-white text-sm font-medium transition-colors"
+          >
+            Sign In
+          </button>
           <Link 
             to="/login" 
             className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold px-6 py-2.5 rounded-lg transition-colors shadow-lg shadow-blue-600/20"
