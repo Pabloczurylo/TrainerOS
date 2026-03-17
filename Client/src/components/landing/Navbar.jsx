@@ -1,29 +1,30 @@
 import { Link } from 'react-router-dom'
+import { Dumbbell } from 'lucide-react'
 
 const Navbar = () => {
   return (
-    
-    <nav className="w-full z-50 py-6 px-6 md:px-12 bg-[#0a0a0a] border-b border-gray-800/50">
+    <nav className="w-full z-50 py-4 px-6 md:px-12 bg-[#0b0f19] border-b border-gray-800/50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo / Nombre */}
-        <div className="font-bold text-xl tracking-tight text-white">
-          Lautaro Lencina
+        <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-white">
+          <Dumbbell className="text-blue-500" size={24} />
+          <span>TrainerOS</span>
         </div>
         
         {/* Enlaces Centrales (Ocultos en móvil) */}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
-          <a href="#servicios" className="hover:text-white transition-colors">Servicios</a>
-          <a href="#sobre-mi" className="hover:text-white transition-colors">Sobre Mí</a>
-          <a href="#testimonios" className="hover:text-white transition-colors"></a>
+          <a href="#caracteristicas" className="hover:text-white transition-colors">Características</a>
+          <a href="#planes" className="hover:text-white transition-colors">Planes</a>
+          <a href="#contacto" className="hover:text-white transition-colors">Contacto</a>
         </div>
 
         {/* Botón de Contacto */}
         <div>
           <Link 
             to="/login" 
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-6 py-2.5 rounded-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold px-6 py-2.5 rounded-lg transition-colors shadow-lg shadow-blue-600/20"
           >
-            Iniciar Sesion
+            Prueba gratis
           </Link>
         </div>
       </div>
