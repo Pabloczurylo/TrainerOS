@@ -13,6 +13,7 @@ import ClientRoutineDetail from './pages/ClientRoutineDetail';
 import ClientExerciseDetail from './pages/ClientExerciseDetail';
 import MainLayout from './components/layout/MainLayout'; 
 import Landing from './pages/Landing'; 
+import Planes from './pages/Planes';
 
 function App() {
   return (
@@ -31,6 +32,9 @@ function App() {
           
           {/* IMPORTANTE: El Dashboard ahora vive en '/dashboard' para no chocar con la Landing */}
           <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* Planes */}
+          <Route path="/planes" element={<Planes />} />
           
           {/* Clientes */}
           <Route path="/clients" element={<Clients />} />
