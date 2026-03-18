@@ -1,229 +1,254 @@
 import { useState, useEffect } from 'react'
-import { Users, Dumbbell, TrendingUp, Plus, Calendar, ClipboardList, Loader2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Users, Activity, History, TrendingUp, TrendingDown, Bell, HelpCircle, Search } from 'lucide-react'
 import { API_URL } from '../config/api'
-import Card from '../components/ui/Card'
-
-// 1. IMPORTAMOS EL STORE DE AUTENTICACIÓN Y LA VISTA DE CLIENTE
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "../store/useAuthStore"
 import UserDashboard from './UserDashboard'
 
 const Dashboard = () => {
-  // 2. OBTENEMOS EL USUARIO ACTUAL
   const { user } = useAuthStore()
   
-  const [metrics, setMetrics] = useState({ users: 0, routines: 0, exercises: 0 })
-  // NUEVO ESTADO PARA LA LISTA DE ACTIVIDAD
-  const [activities, setActivities] = useState([]) 
-  const [loading, setLoading] = useState(true)
+  const [metrics, setMetrics] = useState({ users: 1284, income: "€12,500", newUsers: "+45" })
+  const [activities] = useState([
+    { id: '1', cliente: 'Ana Martínez', initials: 'AM', colorAvatar: 'bg-blue-900 text-blue-300', accion: 'Completó rutina "Pierna A"', fecha: 'Hace 15 min', estado: 'COMPLETADO', colorEstado: 'green' },
+    { id: '2', cliente: 'Juan Rodríguez', initials: 'JR', colorAvatar: 'bg-yellow-900 text-yellow-300', accion: 'Nuevo registro de usuario', fecha: 'Hace 2 horas', estado: 'NUEVO', colorEstado: 'blue' },
+    { id: '3', cliente: 'Laura Costa', initials: 'LC', colorAvatar: 'bg-purple-900 text-purple-300', accion: 'Actualizó objetivos', fecha: 'Hace 4 horas', estado: 'PENDIENTE', colorEstado: 'gray' },
+    { id: '4', cliente: 'Daniel Blanco', initials: 'DB', colorAvatar: 'bg-pink-900 text-pink-300', accion: 'Canceló suscripción', fecha: 'Ayer', estado: 'CANCELADO', colorEstado: 'red' }
+  ])
 
-  // --- FUNCIÓN UTILITARIA: Extraer tiempo desde ID de MongoDB ---
-  const getTimeAgo = (mongoId) => {
-    if (!mongoId) return "Recientemente";
-    
-    // Los primeros 8 caracteres del ObjectId son el timestamp
-    const timestamp = parseInt(mongoId.substring(0, 8), 16) * 1000;
-    const now = Date.now();
-    const diffInSeconds = Math.floor((now - timestamp) / 1000);
-
-    if (diffInSeconds < 60) return "Hace un momento";
-    if (diffInSeconds < 3600) return `Hace ${Math.floor(diffInSeconds / 60)} min`;
-    if (diffInSeconds < 86400) return `Hace ${Math.floor(diffInSeconds / 3600)} h`;
-    return `Hace ${Math.floor(diffInSeconds / 86400)} días`;
-  };
-
-  // 3. LÓGICA DE SEMÁFORO
   if (user && !user.isAdmin) {
     return <UserDashboard />
   }
 
-  // --- A PARTIR DE AQUÍ, SOLO SE EJECUTA SI ERES ADMIN ---
-
+  // Carga de datos reales - Se puede integrar con `activities` si se desea 
   useEffect(() => {
     const loadDashboardData = async () => {
       if (!user?.isAdmin) return; 
-
       try {
-        const [resUsers, resRoutines, resExercises] = await Promise.all([
-          fetch(`${API_URL}/users`),
-          fetch(`${API_URL}/rutinas`),
-          fetch(`${API_URL}/ejercicios`)
-        ])
-        const users = await resUsers.json()
-        const routines = await resRoutines.json()
-        const exercises = await resExercises.json()
+        const [resUsers] = await Promise.all([
+          fetch(`${API_URL}/users`)
+        ]);
+        const users = await resUsers.json();
 
-        // 1. SETEAR MÉTRICAS
-        setMetrics({
-          users: Array.isArray(users) ? users.length : 0,
-          routines: Array.isArray(routines) ? routines.length : 0,
-          exercises: Array.isArray(exercises) ? exercises.length : 0
-        })
-
-        // 2. PROCESAR ACTIVIDAD RECIENTE (Mezclamos Clientes y Rutinas)
-        let newActivities = [];
-
-        if (Array.isArray(users)) {
-            // Filtramos solo los que NO son admin para que parezca actividad de clientes
-            const recentUsers = users
-                .filter(u => !u.isAdmin) 
-                .map(u => ({
-                    id: u._id || u.id,
-                    text: `Nuevo cliente registrado: ${u.nombre}`,
-                    rawDate: parseInt((u._id || u.id).substring(0, 8), 16), // Timestamp para ordenar
-                    time: getTimeAgo(u._id || u.id),
-                    type: "success" // Verde
-                }));
-            newActivities = [...newActivities, ...recentUsers];
+        // Actualiza con datos reales si existen
+        if (Array.isArray(users) && users.length > 0) {
+            setMetrics(prev => ({ ...prev, users: users.length }));
         }
-
-        if (Array.isArray(routines)) {
-            const recentRoutines = routines.map(r => ({
-                id: r._id || r.id,
-                text: `Nueva rutina creada: ${r.nombre}`,
-                rawDate: parseInt((r._id || r.id).substring(0, 8), 16),
-                time: getTimeAgo(r._id || r.id),
-                type: "info" // Azul
-            }));
-            newActivities = [...newActivities, ...recentRoutines];
-        }
-
-        // 3. ORDENAR POR FECHA (Más reciente primero) Y TOMAR LOS ÚLTIMOS 5
-        newActivities.sort((a, b) => b.rawDate - a.rawDate);
-        setActivities(newActivities.slice(0, 5));
-
       } catch (error) {
         console.error("Error cargando dashboard:", error)
-      } finally {
-        setLoading(false)
       }
     }
     loadDashboardData()
   }, [user])
 
-  const stats = [
-    { label: 'Clientes Registrados', value: metrics.users, icon: Users, color: 'text-blue-500', trend: 'Total histórico' },
-    { label: 'Rutinas Activas', value: metrics.routines, icon: ClipboardList, color: 'text-purple-500', trend: 'Asignadas' },
-    { label: 'Ejercicios en Banco', value: metrics.exercises, icon: Dumbbell, color: 'text-green-500', trend: 'Disponibles' },
-  ]
-
-  if (loading && user?.isAdmin) {
-    return (
-      <div className="flex h-[80vh] items-center justify-center text-white">
-        <Loader2 className="animate-spin mr-2" size={40} />
-        <p className="text-xl font-medium">Cargando métricas...</p>
-      </div>
-    )
+  const getBadgeClass = (color) => {
+    switch (color) {
+      case 'green': return 'bg-[#052e16] text-[#10b981] border-[#10b981]/20';
+      case 'blue': return 'bg-[#1e3a8a]/30 text-[#3b82f6] border-[#3b82f6]/20';
+      case 'red': return 'bg-[#450a0a] text-[#ef4444] border-[#ef4444]/20';
+      case 'gray': default: return 'bg-[#1f2937] text-gray-400 border-gray-600/30';
+    }
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 w-full text-white pb-10">
       
-      {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Hola, {user?.nombre || 'Admin'} 👋</h1>
-          <p className="text-gray-400 mt-1">Aquí tienes el resumen de tu día.</p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 px-4 py-2 rounded-lg">
-          <p className="text-white font-medium text-sm">
-            {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
-          </p>
+      {/* HEADER TOP */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+        <h1 className="text-2xl font-bold">Panel de Control</h1>
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input 
+              type="text" 
+              placeholder="Buscar..." 
+              className="w-full bg-[#181f30] border border-[#2a3143] text-sm text-white rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-blue-500 transition-colors"
+            />
+          </div>
+          <button className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors border border-[#2a3143] bg-[#181f30]">
+            <Bell size={18} />
+          </button>
+          <button className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors border border-[#2a3143] bg-[#181f30]">
+            <HelpCircle size={18} />
+          </button>
         </div>
       </div>
 
-      {/* Métricas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat, index) => (
-          <Card key={index} className="p-6 flex items-start justify-between group hover:border-blue-500/30 transition-all cursor-default">
-            <div>
-              <p className="text-gray-400 text-sm font-medium mb-1">{stat.label}</p>
-              <h3 className="text-4xl font-bold text-white mb-2">{stat.value}</h3>
-              <span className="inline-flex items-center gap-1 text-xs font-medium bg-gray-800 text-gray-300 px-2.5 py-1 rounded-full border border-gray-700">
-                <TrendingUp size={12} />
-                {stat.trend}
-              </span>
-            </div>
-            <div className={`p-4 rounded-2xl bg-gray-900 border border-gray-800 ${stat.color} group-hover:scale-110 transition-transform`}>
-              <stat.icon size={24} />
-            </div>
-          </Card>
-        ))}
+      {/* HERO BANNER */}
+      <div className="bg-[#2d68f8] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-lg shadow-blue-900/20 mb-6 relative overflow-hidden">
+        <div className="max-w-2xl relative z-10">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Mejora tu plan para obtener beneficios</h2>
+          <p className="text-blue-100 text-sm md:text-base">Obtén acceso a herramientas avanzadas de análisis, gestión de grupos ilimitada y soporte prioritario 24/7.</p>
+        </div>
+        <button className="bg-white text-[#2d68f8] px-6 py-2.5 rounded-lg font-bold hover:bg-blue-50 transition-colors whitespace-nowrap shadow-sm relative z-10">
+          Mejorar Plan
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* STATS GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Card 1 */}
+        <div className="border border-[#1e293b] bg-[#131826] p-6 rounded-2xl">
+          <div className="flex justify-between items-start mb-4">
+            <p className="text-gray-400 text-sm font-medium">Clientes Activos</p>
+            <div className="p-2 rounded-lg bg-[#064e3b]">
+              <Users className="text-[#10b981]" size={20} />
+            </div>
+          </div>
+          <div className="flex items-end gap-3 mb-1">
+            <h3 className="text-3xl font-bold text-white">{metrics.users !== null ? metrics.users.toLocaleString() : '1,284'}</h3>
+            <span className="text-[#10b981] text-sm font-bold mb-1 flex items-center gap-1">
+              <TrendingUp size={14} className="stroke-[3]" /> +12%
+            </span>
+          </div>
+          <p className="text-[#475569] text-xs font-semibold">vs. el mes anterior</p>
+        </div>
         
-        {/* Accesos Rápidos */}
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-xl font-bold text-white">Accesos Rápidos</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
-            <Link to="/clients/new" className="group">
-              <div className="p-6 h-full bg-gray-900 border border-gray-800 rounded-2xl hover:border-blue-500/50 hover:bg-blue-900/10 transition-all flex items-center gap-5 cursor-pointer relative overflow-hidden">
-                <div className="bg-blue-600 rounded-xl p-4 text-white group-hover:scale-110 transition-transform shadow-lg shadow-blue-900/20 z-10">
-                  <Plus size={28} />
-                </div>
-                <div className="z-10">
-                  <h3 className="font-bold text-white text-lg group-hover:text-blue-400 transition-colors">Nuevo Cliente</h3>
-                  <p className="text-sm text-gray-400 mt-1">Registrar usuario</p>
-                </div>
-                <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"></div>
-              </div>
-            </Link>
-
-            <Link to="/routines/new" className="group">
-              <div className="p-6 h-full bg-gray-900 border border-gray-800 rounded-2xl hover:border-purple-500/50 hover:bg-purple-900/10 transition-all flex items-center gap-5 cursor-pointer relative overflow-hidden">
-                <div className="bg-purple-600 rounded-xl p-4 text-white group-hover:scale-110 transition-transform shadow-lg shadow-purple-900/20 z-10">
-                  <ClipboardList size={28} />
-                </div>
-                <div className="z-10">
-                  <h3 className="font-bold text-white text-lg group-hover:text-purple-400 transition-colors">Crear Rutina</h3>
-                  <p className="text-sm text-gray-400 mt-1">Diseñar plan</p>
-                </div>
-                <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all"></div>
-              </div>
-            </Link>
-
+        {/* Card 2 */}
+        <div className="border border-[#1e293b] bg-[#131826] p-6 rounded-2xl">
+          <div className="flex justify-between items-start mb-4">
+            <p className="text-gray-400 text-sm font-medium">Ingresos Mensuales</p>
+            <div className="p-2 rounded-lg bg-[#1e3a8a]">
+              <Activity className="text-[#60a5fa]" size={20} />
+            </div>
           </div>
+          <div className="flex items-end gap-3 mb-1">
+            <h3 className="text-3xl font-bold text-white">{metrics.income}</h3>
+            <span className="text-[#10b981] text-sm font-bold mb-1 flex items-center gap-1">
+              <TrendingUp size={14} className="stroke-[3]" /> +8%
+            </span>
+          </div>
+          <p className="text-[#475569] text-xs font-semibold">vs. el mes anterior</p>
+        </div>
 
-          {/* Banner de Agenda */}
-          <div className="p-6 bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700/50 rounded-2xl flex items-center gap-4">
-              <div className="p-3 bg-gray-800 rounded-full text-gray-300 border border-gray-700">
-                <Calendar size={24} />
-              </div>
-              <div>
-                <h3 className="font-bold text-white text-lg">Agenda Semanal</h3>
-                <p className="text-gray-400 text-sm">No tienes revisiones pendientes para hoy.</p>
-              </div>
+        {/* Card 3 */}
+        <div className="border border-[#1e293b] bg-[#131826] p-6 rounded-2xl">
+          <div className="flex justify-between items-start mb-4">
+            <p className="text-gray-400 text-sm font-medium">Nuevos Registros</p>
+            <div className="p-2 rounded-lg bg-[#451a03]">
+              <History className="text-[#f97316]" size={20} />
+            </div>
+          </div>
+          <div className="flex items-end gap-3 mb-1">
+            <h3 className="text-3xl font-bold text-white">{metrics.newUsers}</h3>
+            <span className="text-[#f97316] text-sm font-bold mb-1 flex items-center gap-1">
+              <TrendingDown size={14} className="stroke-[3]" /> -2%
+            </span>
+          </div>
+          <p className="text-[#475569] text-xs font-semibold">vs. el mes anterior</p>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* LEFT COL: Actividad Reciente */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex justify-between items-center mb-2 px-1">
+            <h2 className="text-xl font-bold text-white">Actividad Reciente</h2>
+            <button className="text-[#3b82f6] text-sm hover:underline font-bold">Ver todo</button>
+          </div>
+          <div className="border border-[#1e293b] bg-[#131826] rounded-2xl overflow-hidden overflow-x-auto">
+            <table className="w-full text-left border-collapse whitespace-nowrap">
+              <thead>
+                <tr className="border-b border-[#1e293b]">
+                  <th className="px-6 py-4 text-gray-400 text-xs font-bold uppercase tracking-wider">Cliente</th>
+                  <th className="px-6 py-4 text-gray-400 text-xs font-bold uppercase tracking-wider">Acción</th>
+                  <th className="px-6 py-4 text-gray-400 text-xs font-bold uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-4 text-gray-400 text-xs font-bold uppercase tracking-wider">Estado</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1e293b]">
+                {activities.map((act) => (
+                  <tr key={act.id} className="hover:bg-[#1a2133]/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full ${act.colorAvatar} flex items-center justify-center text-xs font-bold`}>
+                          {act.initials}
+                        </div>
+                        <span className="text-white text-sm font-bold">{act.cliente}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-300 text-sm font-medium">{act.accion}</td>
+                    <td className="px-6 py-4 text-gray-500 text-sm font-medium">{act.fecha}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider border ${getBadgeClass(act.colorEstado)}`}>
+                        {act.estado}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Actividad Reciente (REAL) */}
-        <div className="lg:col-span-1">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-white">Últimos Movimientos</h2>
-          </div>
+        {/* RIGHT COL: Próximas Sesiones + Estado del Sistema */}
+        <div className="lg:col-span-1 space-y-6">
           
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden min-h-[300px]">
-            {activities.length > 0 ? (
-                activities.map((activity, index) => (
-                <div key={activity.id} className={`p-4 flex gap-4 items-start hover:bg-gray-800/50 transition-colors ${index !== activities.length - 1 ? 'border-b border-gray-800' : ''}`}>
-                    <div className={`mt-2 w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                    activity.type === 'success' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 
-                    activity.type === 'info' ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'bg-gray-500'
-                    }`} />
-                    <div>
-                    <p className="text-sm text-gray-200 font-medium leading-snug">{activity.text}</p>
-                    <p className="text-xs text-gray-500 mt-1.5 font-mono">{activity.time}</p>
-                    </div>
+          {/* Próximas Sesiones */}
+          <div>
+            <h2 className="text-xl font-bold text-white mb-4 px-1">Próximas Sesiones</h2>
+            <div className="border border-[#1e293b] bg-[#131826] rounded-2xl p-1 shadow-sm">
+              
+              {/* Session 1 */}
+              <div className="flex items-start gap-4 p-4 border-b border-[#1e293b] hover:bg-[#1a2133]/50 rounded-t-xl transition-colors">
+                <div className="bg-[#2d68f8] rounded-xl p-2 flex flex-col items-center justify-center min-w-[50px]">
+                  <span className="text-blue-200 text-[10px] font-bold uppercase">Oct</span>
+                  <span className="text-white font-bold text-lg leading-none mt-1">12</span>
                 </div>
-                ))
-            ) : (
-                <div className="p-8 text-center text-gray-500 text-sm">
-                    No hay actividad reciente registrada.
+                <div>
+                  <h4 className="text-white font-bold text-sm">Entrenamiento HIIT</h4>
+                  <p className="text-[#a1a1aa] text-xs mt-1">10:00 - 11:30 | Sala 3</p>
+                  <div className="flex items-center gap-1.5 mt-2 text-[#71717a] text-xs font-bold">
+                    <Users size={12} />
+                    <span>12 ASISTENTES</span>
+                  </div>
                 </div>
-            )}
+              </div>
+
+              {/* Session 2 */}
+              <div className="flex items-start gap-4 p-4 hover:bg-[#1a2133]/50 transition-colors">
+                <div className="rounded-xl p-2 flex flex-col items-center justify-center min-w-[50px] bg-[#1e293b]">
+                  <span className="text-gray-400 text-[10px] font-bold uppercase">Oct</span>
+                  <span className="text-white font-bold text-lg leading-none mt-1">14</span>
+                </div>
+                <div>
+                  <h4 className="text-white font-bold text-sm">Sesión Yoga Pro</h4>
+                  <p className="text-[#a1a1aa] text-xs mt-1">08:30 - 09:30 | Terraza</p>
+                  <div className="flex items-center gap-1.5 mt-2 text-[#71717a] text-xs font-bold">
+                    <Users size={12} />
+                    <span>8 ASISTENTES</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3">
+                <button className="w-full py-2.5 rounded-lg border border-[#1e293b] text-white text-sm font-bold hover:bg-[#2d68f8]/10 transition-colors">
+                  Ver Calendario Completo
+                </button>
+              </div>
+            </div>
           </div>
+
+          {/* Estado del sistema */}
+          <div className="border border-[#1e293b] bg-[#131826] rounded-2xl p-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-emerald-500"></div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+              <h3 className="text-[#3b82f6] text-xs font-bold uppercase tracking-wider">Estado del Sistema</h3>
+            </div>
+            <div className="flex justify-between text-xs mb-2">
+              <span className="text-[#94a3b8]">Almacenamiento</span>
+              <span className="text-white font-bold">64%</span>
+            </div>
+            <div className="w-full rounded-full h-1 mb-4 bg-[#1e293b]">
+              <div className="bg-[#3b82f6] h-1 rounded-full w-[64%]"></div>
+            </div>
+            <p className="text-[#64748b] text-xs leading-relaxed font-medium">
+              Todos los servicios están funcionando correctamente. Próximo mantenimiento: Domingo 04:00 AM.
+            </p>
+          </div>
+
         </div>
       </div>
 

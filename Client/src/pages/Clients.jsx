@@ -6,7 +6,13 @@ import Card from '../components/ui/Card'
 import ConfirmModal from '../components/ConfirmModal'
 
 const Clients = () => {
-  const [clients, setClients] = useState([])
+  const [clients, setClients] = useState([
+    { id: 'm1', nombre: 'Ana Martínez', email: 'ana.martinez@ejemplo.com', isAdmin: false },
+    { id: 'm2', nombre: 'Juan Rodríguez', email: 'jrodriguez@ejemplo.com', isAdmin: false },
+    { id: 'm3', nombre: 'Laura Costa', email: 'laura.costa@ejemplo.com', isAdmin: false },
+    { id: 'm4', nombre: 'Daniel Blanco', email: 'dblanco@ejemplo.com', isAdmin: false },
+    { id: 'm5', nombre: 'Carlos Méndez', email: 'carlos@utraining.com', isAdmin: true }
+  ])
   const [searchTerm, setSearchTerm] = useState('')
   const [openMenu, setOpenMenu] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -27,7 +33,9 @@ const Clients = () => {
         const response = await fetch(`${API_URL}/users`) 
         if (!response.ok) throw new Error('Error al obtener clientes')
         const data = await response.json()
-        setClients(data)
+        if (Array.isArray(data) && data.length > 0) {
+          setClients(data)
+        }
       } catch (error) {
         console.error("Error de conexión:", error)
       } finally {

@@ -11,7 +11,7 @@ const MainLayout = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
 
   return (
-    <div className="flex min-h-screen bg-black">
+    <div className="flex min-h-screen bg-[#0b101e]">
       
       {/* Pasamos el estado y la función a la Sidebar */}
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -23,11 +23,11 @@ const MainLayout = () => {
         <div className="md:hidden mb-6 flex items-center justify-between">
             <button 
                 onClick={toggleSidebar}
-                className="text-gray-300 hover:text-white p-2 bg-gray-900 rounded-lg border border-gray-800"
+                className="text-gray-300 hover:text-white p-2 bg-[#131826] rounded-lg border border-[#1e293b]"
             >
                 <Menu size={24} />
             </button>
-            <span className="font-bold text-blue-500">PT Manager</span>
+            <span className="font-bold text-white">Unlimited Training</span>
         </div>
 
         {/* Aquí se cargan tus páginas */}
