@@ -57,25 +57,28 @@ const Planes = () => {
   ];
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-500 w-full text-white pb-10 max-w-5xl pt-4 mx-4 md:mx-0">
+    <div className="space-y-12 animate-in fade-in duration-500 w-full text-white pb-10 max-w-6xl mx-auto pt-4">
       
       {/* Header */}
-      <div className="text-left mb-10">
-        <h1 className="text-3xl font-extrabold text-white mb-3">Planes de Suscripción</h1>
+      <div className="text-left mb-10 px-2 lg:px-0">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3">Planes de Suscripción</h1>
         <p className="text-[#94a3b8] font-medium text-sm md:text-base">Elige el plan que mejor se adapte a tu crecimiento como entrenador.</p>
       </div>
 
       {/* Pricing Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 px-2 lg:px-0">
         {plans.map((plan, index) => (
           <PricingCard key={index} {...plan} />
         ))}
       </div>
 
-      <div className="my-16 border-t border-[#1e293b] w-full max-w-4xl mx-auto"></div>
+      {/* Separator */}
+      <div className="px-4 lg:px-0">
+        <div className="my-16 border-t border-[#1e293b] w-full max-w-4xl mx-auto"></div>
+      </div>
 
       {/* FAQ Section */}
-      <div className="max-w-4xl mx-auto mt-16">
+      <div className="max-w-4xl mx-auto mt-16 px-4 lg:px-0">
         <h2 className="text-2xl font-bold text-white mb-8">Preguntas Frecuentes</h2>
         <div className="space-y-4">
           {faqs.map((faq, index) => (
