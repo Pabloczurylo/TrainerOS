@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, ClipboardList, Dumbbell, Settings, LogOut, X } from 'lucide-react'
+import { LayoutDashboard, Users, ClipboardList, Dumbbell, Settings, LogOut, X, CreditCard, MessageSquare } from 'lucide-react'
 import { useAuthStore } from "../../store/useAuthStore";
 
 // 1. Recibimos las props del MainLayout
@@ -19,10 +19,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   }
 
   const menuItems = [
-    { path: '/dashboard', name: 'Panel de Control', icon: LayoutDashboard, adminOnly: false },
-    { path: '/clients', name: 'Clientes', icon: Users, adminOnly: false },
-    { path: '/routines', name: 'Rutinas', icon: ClipboardList, adminOnly: false },
-    { path: '/exercises', name: 'Ejercicios', icon: Dumbbell, adminOnly: false },
+    { path: '/dashboard', name: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
+    { path: '/routines', name: 'Entrenamientos', icon: Dumbbell, adminOnly: false },
+    { path: '/clients', name: 'Alumnos', icon: Users, adminOnly: false },
+    { path: '/planes', name: 'Planes', icon: CreditCard, adminOnly: false },
+    { path: '/mensajes', name: 'Mensajes', icon: MessageSquare, adminOnly: false },
     { path: '/settings', name: 'Configuración', icon: Settings, adminOnly: false },
   ]
 
@@ -62,7 +63,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <Dumbbell className="text-white" size={24} />
             </div>
             <div>
-              <h1 className="text-white font-bold text-sm leading-tight">Unlimited Training</h1>
+              <h1 className="text-white font-bold text-sm leading-tight">TrainerOS</h1>
               <p className="text-gray-400 text-xs">{user?.isAdmin ? 'Administrador' : 'Usuario'}</p>
             </div>
           </div>
@@ -110,7 +111,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
             <button 
               onClick={logout}
-              className="flex items-center gap-3 px-4 py-2.5 w-full text-gray-400 hover:text-red-400 hover:bg-red-900/10 rounded-lg transition-colors font-medium text-sm"
+              className="flex items-center justify-center gap-3 px-4 py-2.5 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-bold text-sm"
             >
               <LogOut size={18} />
               Cerrar Sesión
