@@ -2,7 +2,9 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
 
 const ProtectedRoute = () => {
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated)
+  // Desactivado temporalmente ya que no hay backend:
+  // const isAuthenticated = useAuthStore(state => state.isAuthenticated)
+  const isAuthenticated = true;
 
   // Si no está autenticado, redirigir al Login
   if (!isAuthenticated) {

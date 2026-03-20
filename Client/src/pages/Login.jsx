@@ -41,28 +41,20 @@ const Login = () => {
     setServerError(''); 
 
     try {
-      const response = await fetch(`${API_URL}/users/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: data.email, 
-          password: data.password
-        }), 
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Credenciales incorrectas');
-      }
-
-      login(result.user, result.token);
-      navigate('/dashboard'); 
+      // Bypassing fetch ya que no hay backend:
+      // Simulamos una respuesta exitosa
+      setTimeout(() => {
+        const fakeUser = { id: 1, name: data.email.split('@')[0], email: data.email };
+        const fakeToken = "temp-token-without-backend";
+        
+        login(fakeUser, fakeToken);
+        navigate('/dashboard'); 
+        setIsLoading(false);
+      }, 800);
 
     } catch (error) {
       console.error(error);
       setServerError(error.message || 'Error al conectar con el servidor');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -184,4 +176,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Login;
