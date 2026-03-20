@@ -26,11 +26,12 @@ const Navbar = () => {
           >
             Log In
           </Link>
-          <button 
+          <Link 
+            to="/signin"
             className="hidden md:block text-gray-300 hover:text-white text-sm font-medium transition-colors"
           >
             Sign In
-          </button>
+          </Link>
           <Link 
             to="/login" 
             className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold px-6 py-2.5 rounded-lg transition-colors shadow-lg shadow-blue-600/20"
