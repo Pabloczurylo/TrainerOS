@@ -8,6 +8,7 @@ import RoutineDetail from './pages/RoutineDetail'
 import ExercisesList from './pages/ExercisesList'
 import ExerciseForm from './pages/ExerciseForm'
 import Login from './pages/Login'
+import Signin from './pages/Signin'
 import ProtectedRoute from './components/ProtectedRoute' 
 import ClientRoutineDetail from './pages/ClientRoutineDetail';
 import ClientExerciseDetail from './pages/ClientExerciseDetail';
@@ -25,6 +26,7 @@ function App() {
       
       {/* Login sigue siendo público */}
       <Route path="/login" element={<Login />} />
+      <Route path="/signin" element={<Signin />} />
 
       {/* --- RUTAS PROTEGIDAS --- */}
       <Route element={<ProtectedRoute />}>

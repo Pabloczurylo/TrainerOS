@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, Loader2, AlertCircle, Dumbbell } from 'lucide-react'; 
 import { useNavigate, Link } from 'react-router-dom'; 
-import { API_URL } from '../config/api';
 import { useAuthStore } from '../store/useAuthStore';
 
 const GoogleIcon = () => (
@@ -26,27 +25,30 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const Login = () => {
+const Signin = () => {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login); 
   
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  // Added watch to compare password and confirmPassword fields
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const password = watch("password", "");
 
   const onSubmit = async (data) => {
     setIsLoading(true);
     setServerError(''); 
 
     try {
-      // Bypassing fetch ya que no hay backend:
-      // Simulamos una respuesta exitosa
+      // Simular un registro exitoso (sin backend)
       setTimeout(() => {
-        const fakeUser = { id: 1, name: data.email.split('@')[0], email: data.email };
+        const fakeUser = { id: Date.now(), name: data.fullName, email: data.email };
         const fakeToken = "temp-token-without-backend";
         
+        // Log in the state and redirect to dashboard
         login(fakeUser, fakeToken);
         navigate('/dashboard'); 
         setIsLoading(false);
@@ -77,14 +79,14 @@ const Login = () => {
           <h1 className="text-2xl font-bold text-white tracking-wide">TrainerOS</h1>
         </div>
 
-        {/* Login Card */}
+        {/* Register Card */}
         <div className="w-full max-w-[420px] bg-[#111827]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-8 shadow-2xl">
-          <div className="text-center mb-6">
-            <h2 className="text-xl font-bold text-white mb-1">Bienvenido de nuevo</h2>
-            <p className="text-sm text-slate-400">Ingresa a tu cuenta para gestionar tus rutinas</p>
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-white mb-2">Crear una cuenta</h2>
+            <p className="text-sm text-slate-400">Empieza a gestionar tus entrenamientos hoy mismo</p>
           </div>
 
-          {/* Mensaje de Error */}
+          {/* Error Message */}
           {serverError && (
             <div className="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg flex items-center gap-3 text-red-200 text-sm">
               <AlertCircle size={18} className="shrink-0" />
@@ -98,7 +100,7 @@ const Login = () => {
               className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-black font-semibold py-2.5 px-4 rounded-lg transition-colors"
             >
               <GoogleIcon />
-              <span>Iniciar sesión con Google</span>
+              <span>Registrarse con Google</span>
             </button>
           </div>
 
@@ -109,12 +111,30 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Input: Nombre completo */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-200 block">Nombre completo</label>
+              <input
+                {...register("fullName", { required: "El nombre es obligatorio" })}
+                type="text"
+                placeholder="Tu nombre"
+                className="w-full bg-[#0B1120] border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg py-2.5 px-3 text-sm outline-none transition-all placeholder:text-slate-600 text-white"
+              />
+              {errors.fullName && <span className="text-red-500 text-xs">{errors.fullName.message}</span>}
+            </div>
+
             {/* Input: Correo electrónico */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-slate-200 block">Correo electrónico</label>
               <input
-                {...register("email", { required: "El correo electrónico es obligatorio" })}
-                type="email"
+                {...register("email", { 
+                  required: "El correo electrónico es obligatorio",
+                  pattern: {
+                    value: /\S+@\S+\.\S+/,
+                    message: "Ingresa un correo válido"
+                  }
+                })}
+                type="text"
                 placeholder="ejemplo@correo.com"
                 className="w-full bg-[#0B1120] border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg py-2.5 px-3 text-sm outline-none transition-all placeholder:text-slate-600 text-white"
               />
@@ -123,15 +143,16 @@ const Login = () => {
 
             {/* Input: Contraseña */}
             <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium text-slate-200">Contraseña</label>
-                <Link to="/forgot-password" className="text-xs text-blue-500 hover:text-blue-400 transition-colors">
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
+              <label className="text-sm font-medium text-slate-200 block">Contraseña</label>
               <div className="relative">
                 <input
-                  {...register("password", { required: "La contraseña es obligatoria" })}
+                  {...register("password", { 
+                    required: "La contraseña es obligatoria",
+                    minLength: {
+                      value: 6,
+                      message: "La contraseña debe tener al menos 6 caracteres"
+                    }
+                  })}
                   type={showPassword ? "text" : "password"} 
                   placeholder="••••••••"
                   className="w-full bg-[#0B1120] border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg py-2.5 px-3 pr-10 text-sm outline-none transition-all placeholder:text-slate-600 text-white"
@@ -147,18 +168,42 @@ const Login = () => {
               {errors.password && <span className="text-red-500 text-xs">{errors.password.message}</span>}
             </div>
 
-            {/* Botón Submit */}
+            {/* Input: Confirmar contraseña */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-200 block">Confirmar contraseña</label>
+              <div className="relative">
+                <input
+                  {...register("confirmPassword", { 
+                    required: "Confirma tu contraseña",
+                    validate: (value) => value === password || "Las contraseñas no coinciden"
+                  })}
+                  type={showConfirmPassword ? "text" : "password"} 
+                  placeholder="••••••••"
+                  className="w-full bg-[#0B1120] border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg py-2.5 px-3 pr-10 text-sm outline-none transition-all placeholder:text-slate-600 text-white"
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors flex items-center justify-center p-1"
+                >
+                  {showConfirmPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
+              {errors.confirmPassword && <span className="text-red-500 text-xs">{errors.confirmPassword.message}</span>}
+            </div>
+
+            {/* Submit Button */}
             <button
               disabled={isLoading}
               type="submit"
-              className="w-full bg-[#3b82f6] hover:bg-blue-600 text-white font-medium py-2.5 rounded-lg mt-2 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-blue-900/20"
+              className="w-full bg-[#3b82f6] hover:bg-blue-600 text-white font-medium py-2.5 rounded-lg mt-4 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-blue-900/20"
             >
-              {isLoading ? <Loader2 className="animate-spin" /> : 'Iniciar sesión'}
+              {isLoading ? <Loader2 className="animate-spin" /> : 'Crear cuenta'}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-slate-400">
-            ¿No tienes una cuenta? <Link to="/signin" className="text-blue-500 hover:text-blue-400 font-medium">Regístrate gratis</Link>
+          <div className="mt-8 text-center text-sm text-slate-400 border-t border-slate-800/50 pt-6">
+            ¿Ya tienes una cuenta? <Link to="/login" className="text-blue-500 hover:text-blue-400 font-medium">Iniciar sesión</Link>
           </div>
         </div>
 
@@ -176,4 +221,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signin;
