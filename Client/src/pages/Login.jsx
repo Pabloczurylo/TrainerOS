@@ -74,7 +74,7 @@ const Login = () => {
           <div className="p-2 bg-[#1E293B]/50 border border-slate-700/50 rounded-lg mb-4">
             <Dumbbell className="text-blue-500 w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-wide">Unlimited Training</h1>
+          <h1 className="text-2xl font-bold text-white tracking-wide">TrainerOS</h1>
         </div>
 
         {/* Login Card */}
@@ -170,7 +170,7 @@ const Login = () => {
       </div>
 
       <div className="w-full py-6 text-xs text-slate-500 z-10 text-center border-t border-slate-800/50">
-        © 2024 Unlimited Training System. Todos los derechos reservados.
+        © 2024 TrainerOS System. Todos los derechos reservados.
       </div>
     </div>
   );
