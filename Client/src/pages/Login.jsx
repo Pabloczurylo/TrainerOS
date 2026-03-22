@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, Loader2, AlertCircle, Dumbbell } from 'lucide-react'; 
 import { useNavigate, Link } from 'react-router-dom'; 
+import { GoogleLogin } from '@react-oauth/google';
 import { API_URL } from '../config/api';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -35,6 +36,29 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm();
+
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    setIsGoogleLoading(true);
+    setServerError('');
+    try {
+      const res = await fetch(`${API_URL}/users/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al iniciar con Google');
+      login(data.user, data.token);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error(error);
+      setServerError(error.message || 'Error al conectar con Google');
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -93,13 +117,17 @@ const Login = () => {
           )}
 
           <div className="space-y-4 mb-6">
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-black font-semibold py-2.5 px-4 rounded-lg transition-colors"
-            >
-              <GoogleIcon />
-              <span>Iniciar sesión con Google</span>
-            </button>
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleLogin}
+                onError={() => setServerError('Error al iniciar con Google')}
+                text="signin_with"
+                shape="rectangular"
+                size="large"
+                width="380"
+                theme="filled_blue"
+              />
+            </div>
           </div>
 
           <div className="flex items-center gap-3 mb-6">
