@@ -9,35 +9,37 @@ import ExercisesList from './pages/ExercisesList'
 import ExerciseForm from './pages/ExerciseForm'
 import Login from './pages/Login'
 import Signin from './pages/Signin'
-import ProtectedRoute from './components/ProtectedRoute' 
+import ProtectedRoute from './components/ProtectedRoute'
 import ClientRoutineDetail from './pages/ClientRoutineDetail';
 import ClientExerciseDetail from './pages/ClientExerciseDetail';
-import MainLayout from './components/layout/MainLayout'; 
-import Landing from './pages/Landing'; 
+import MainLayout from './components/layout/MainLayout';
+import Landing from './pages/Landing';
 import Planes from './pages/Planes';
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
   return (
     <Routes>
       {/* --- RUTAS PÚBLICAS --- */}
-      
+
       {/* La raíz ahora es la Landing Page */}
       <Route path="/" element={<Landing />} />
-      
+
       {/* Login sigue siendo público */}
       <Route path="/login" element={<Login />} />
       <Route path="/signin" element={<Signin />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* --- RUTAS PROTEGIDAS --- */}
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
-          
+
           {/* IMPORTANTE: El Dashboard ahora vive en '/dashboard' para no chocar con la Landing */}
           <Route path="/dashboard" element={<Dashboard />} />
-          
+
           {/* Planes */}
           <Route path="/planes" element={<Planes />} />
-          
+
           {/* Clientes */}
           <Route path="/clients" element={<Clients />} />
           <Route path="/clients/new" element={<ClientForm />} />
@@ -48,7 +50,7 @@ function App() {
           <Route path="/routines/new" element={<CreateRoutine />} />
           <Route path="/routines/edit/:id" element={<CreateRoutine />} />
           <Route path="/routines/:id" element={<RoutineDetail />} />
-          
+
           {/* Vista Cliente */}
           <Route path="/rutina" element={<ClientRoutineDetail />} />
           <Route path="/ejercicio" element={<ClientExerciseDetail />} />
