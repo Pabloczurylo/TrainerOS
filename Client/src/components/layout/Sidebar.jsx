@@ -9,12 +9,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   const isActive = (path) => {
     // Exact match for dashboard, partial check for others to keep active state on subpages
-    const isCurrentPath = path === '/dashboard' 
-      ? location.pathname === path 
+    const isCurrentPath = path === '/dashboard'
+      ? location.pathname === path
       : location.pathname.startsWith(path);
-      
-    return isCurrentPath 
-      ? 'bg-[#1e3a8a]/20 text-[#3b82f6] border-l-2 border-[#3b82f6]' 
+
+    return isCurrentPath
+      ? 'bg-[#1e3a8a]/20 text-[#3b82f6] border-l-2 border-[#3b82f6]'
       : 'text-gray-400 hover:bg-[#1f2937]/50 hover:text-white border-l-2 border-transparent'
   }
 
@@ -43,7 +43,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     <>
       {/* 2. OVERLAY (Fondo oscuro para cerrar al hacer click afuera en móvil) */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
           onClick={toggleSidebar}
         />
@@ -68,8 +68,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </div>
           </div>
           {/* Botón X visible solo en móvil */}
-          <button 
-            onClick={toggleSidebar} 
+          <button
+            onClick={toggleSidebar}
             className="md:hidden text-gray-400 hover:text-white p-1 rounded-md hover:bg-[#1e293b] transition-colors"
           >
             <X size={24} />
@@ -97,10 +97,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             {/* User Profile Info like in the dashboard image */}
             <div className="flex items-center gap-3 px-2">
               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <img 
-                  src={`https://ui-avatars.com/api/?name=${user?.nombre || 'Admin'}&background=c7d2fe&color=3730a3&bold=true`} 
-                  alt="Avatar" 
-                  className="w-full h-full rounded-full" 
+                <img
+                  src={`https://ui-avatars.com/api/?name=${user?.nombre || 'Admin'}&background=c7d2fe&color=3730a3&bold=true`}
+                  alt="Avatar"
+                  className="w-full h-full rounded-full"
                 />
               </div>
               <div className="flex-1 overflow-hidden">
@@ -109,7 +109,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               </div>
             </div>
 
-            <button 
+            <button
               onClick={logout}
               className="flex items-center justify-center gap-3 px-4 py-2.5 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-bold text-sm"
             >
