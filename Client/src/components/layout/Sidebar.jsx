@@ -1,11 +1,17 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Users, ClipboardList, Dumbbell, Settings, LogOut, X, CreditCard, MessageSquare } from 'lucide-react'
 import { useAuthStore } from "../../store/useAuthStore";
 
 // 1. Recibimos las props del MainLayout
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation()
+  const navigate = useNavigate()
   const { user, logout } = useAuthStore()
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  }
 
   const isActive = (path) => {
     // Exact match for dashboard, partial check for others to keep active state on subpages
@@ -110,7 +116,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </div>
 
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="flex items-center justify-center gap-3 px-4 py-2.5 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-bold text-sm"
             >
               <LogOut size={18} />
