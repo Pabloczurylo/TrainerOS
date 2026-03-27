@@ -27,6 +27,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const menuItems = [
     { path: '/dashboard', name: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
     { path: '/routines', name: 'Entrenamientos', icon: Dumbbell, adminOnly: false },
+    { path: '/exercises', name: 'Ejercicios', icon: ClipboardList, adminOnly: false },
     { path: '/clients', name: 'Alumnos', icon: Users, adminOnly: false },
     { path: '/planes', name: 'Planes', icon: CreditCard, adminOnly: false },
     { path: '/mensajes', name: 'Mensajes', icon: MessageSquare, adminOnly: false },
